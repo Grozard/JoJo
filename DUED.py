@@ -1,6 +1,7 @@
 import requests
 import json
 import base64
+import webbrowser
 
 def get_user_repo_info(username):
     """
@@ -58,6 +59,33 @@ def get_user_repo_info(username):
     except json.JSONDecodeError:
         return None, "Ошибка при обработке данных", None
 
+def offer_registration(username):
+    """
+    Предлагает пользователю зарегистрироваться на GitHub
+    """
+    print(f"\n🤔 Пользователь '{username}' не найден на GitHub!")
+    print("=" * 50)
+    print("Возможно, вы:")
+    print("1. Ошиблись в написании имени")
+    print("2. Еще не зарегистрированы на GitHub")
+    print("3. Имеете приватный аккаунт")
+    print("=" * 50)
+    
+    choice = input("Хотите зарегистрироваться на GitHub? (y/n): ").strip().lower()
+    
+    if choice in ['y', 'yes', 'да', 'д']:
+        print("\n🎯 Открываю страницу регистрации GitHub...")
+        print("🔗 https://github.com/signup")
+        webbrowser.open("https://github.com/signup")
+        print("\n✅ После регистрации вы сможете:")
+        print("   - Создавать репозитории")
+        print("   - Участвовать в open-source проектах")
+        print("   - Хранить свой код в облаке")
+        print("   - Сотрудничать с другими разработчиками")
+    else:
+        print("\n👌 Хорошо! Проверьте правильность введенного имени.")
+        print("💡 Подсказка: имя пользователя чувствительно к регистру")
+
 def process_user(username):
     """
     Обрабатывает запрос для одного пользователя
@@ -69,7 +97,8 @@ def process_user(username):
     
     if user_data is None:
         if readme_content == "Пользователь не найден":
-            print(f"👋 Здравствуйте, неизвестный пользователь!")
+            print(f"👋 Здравствуйте!")
+            offer_registration(username)
         else:
             print(f"❌ {readme_content}")
         return
@@ -80,15 +109,14 @@ def process_user(username):
     print(f"📝 Биография: {user_data.get('bio', 'Не указана')}")
     print(f"📍 Местоположение: {user_data.get('location', 'Не указано')}")
     print(f"🔗 Профиль: {user_data['html_url']}")
-    print(f"📂 Репозиторий: {repo_name}")
+    if repo_name:
+        print(f"📂 Репозиторий: {repo_name}")
     print("=" * 50)
     
     # Выводим содержимое README
-    print("\n📖 Содержимое README файла:")
-    print("-" * 30)
-    if readme_content == "README файл не найден":
-        print("❌ README файл не найден в репозитории")
-    else:
+    if readme_content and readme_content != "README файл не найден":
+        print("\n📖 Содержимое README файла:")
+        print("-" * 30)
         # Ограничиваем вывод до первых 500 символов
         preview = readme_content[:500] + "..." if len(readme_content) > 500 else readme_content
         print(preview)
@@ -125,3 +153,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+    
